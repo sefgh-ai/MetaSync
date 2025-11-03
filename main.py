@@ -3,7 +3,7 @@ import json
 import time
 import base64
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 import requests
 from supabase import create_client, Client
@@ -80,8 +80,8 @@ def yesterday_str() -> str:
     return (datetime.utcnow() - timedelta(days=1)).strftime("%Y-%m-%d")
 
 
-def search_repos(lang: str, date_str: str) -> list[Dict[str, Any]]:
-    repos: list[Dict[str, Any]] = []
+def search_repos(lang: str, date_str: str) -> List[Dict[str, Any]]:
+    repos: List[Dict[str, Any]] = []
     page = 1
     while len(repos) < 1000:
         query = f'language:{lang} created:{date_str}'
@@ -102,10 +102,10 @@ def search_repos(lang: str, date_str: str) -> list[Dict[str, Any]]:
                 repo_full_name=None,
                 error_type="RequestError",
                 error_message=str(e),
-                request_url=r.request.url if 'r' in locals() else None,
+                request_url=e.request.url if hasattr(e, 'request') and e.request else None,
                 request_method="GET",
-                response_status=getattr(e.response, 'status_code', None),
-                response_body=getattr(e.response, 'text', None),
+                response_status=getattr(e.response, 'status_code', None) if hasattr(e, 'response') else None,
+                response_body=getattr(e.response, 'text', None) if hasattr(e, 'response') else None,
             )
             break
 
@@ -190,8 +190,9 @@ def count_lines(full_name: str, default_branch: str = "main") -> int:
             try:
                 raw = base64.b64decode(content_r.json()["content"]).decode("utf-8", errors="ignore")
                 lines += sum(1 for line in raw.split("\n") if line.strip())
-            except:
-                pass
+            except Exception as e:
+                # Skip files that can't be decoded or parsed
+                continue
     except Exception as e:
         log_error(
             source="line_count",
@@ -293,6 +294,3 @@ def handler(event, context=None):
         "statusCode": 200,
         "body": json.dumps({"date": date_str, "inserted": total_inserted}),
     }
-
-
-export = handler
