@@ -1,14 +1,15 @@
 {
   "version": 2,
-  "functions": {
-    "main.py": {
-      "runtime": "python3.11"
-    }
-  },
-  "crons": [
+  "builds": [
     {
-      "path": "/api/main",
-      "schedule": "0 0 * * *"
+      "src": "main.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "main.py"
     }
   ]
 }
