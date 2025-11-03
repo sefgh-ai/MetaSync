@@ -249,6 +249,18 @@ def insert_repo(repo: Dict[str, Any], lines: int) -> bool:
 #  Vercel Handler
 # -------------------------------------------------
 def handler(event, context=None):
+    # Handle OPTIONS request for CORS preflight
+    if event.get("httpMethod") == "OPTIONS":
+        return {
+            "statusCode": 200,
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            },
+            "body": "",
+        }
+
     date_str = yesterday_str()
     print(f"\n=== FETCHING REPOS FOR {date_str} ===")
 
@@ -292,5 +304,11 @@ def handler(event, context=None):
     print(f"\n=== DONE | TOTAL INSERTED: {total_inserted} ===")
     return {
         "statusCode": 200,
+        "headers": {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        },
         "body": json.dumps({"date": date_str, "inserted": total_inserted}),
     }
