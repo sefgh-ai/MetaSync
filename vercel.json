@@ -4,12 +4,30 @@
     {
       "src": "main.py",
       "use": "@vercel/python"
+    },
+    {
+      "src": "api/stats.py",
+      "use": "@vercel/python"
     }
   ],
   "routes": [
     {
-      "src": "/(.*)",
-      "dest": "main.py"
+      "src": "/",
+      "dest": "/index.html"
+    },
+    {
+      "src": "/api/stats",
+      "dest": "/api/stats.py"
+    },
+    {
+      "src": "/api/sync",
+      "dest": "/main.py"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/sync",
+      "schedule": "0 0 * * *"
     }
   ]
 }
